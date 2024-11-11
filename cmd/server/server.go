@@ -1,8 +1,7 @@
 package server
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"github.com/gofiber/fiber/v3"
 )
 
 type Server interface {
@@ -10,24 +9,20 @@ type Server interface {
 }
 
 type server struct {
-	app *echo.Echo
+	app *fiber.App
 }
 
 func NewServer() Server {
-	echoApp := echo.New()
+	app := fiber.New()
 
 	return &server{
-		app: echoApp,
+		app: app,
 	}
 }
 
 func (s *server) Start() {
-	s.app.Use(middleware.Logger())
-	s.app.Use(middleware.Recover())
+	s.app.Get("/hello-world", s.handleHelloWorld)
+	s.app.Get("/hello/:name", s.handleHello)
 
-	// register API routes
-	s.app.GET("/hello-world", s.handleHelloWorld)
-	s.app.GET("/hello/:name", s.handleHello)
-
-	s.app.Start(":8080")
+	s.app.Listen(":8080")
 }
