@@ -2,15 +2,14 @@ package server
 
 import (
 	"fmt"
-	"net/http"
 
-	"github.com/labstack/echo/v4"
+	"github.com/gofiber/fiber/v3"
 )
 
-func (s *server) handleHello(c echo.Context) error {
-	name := c.Param("name")
+func (s *server) handleHello(c fiber.Ctx) error {
+	name := c.Params("name")
 
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": fmt.Sprintf("Hello, %s!", name),
+	return c.JSON(map[string]string{
+		"message": fmt.Sprintf("Hello, %s 👋!", name),
 	})
 }

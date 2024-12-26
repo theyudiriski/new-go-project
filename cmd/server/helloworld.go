@@ -1,13 +1,7 @@
 package server
 
-import (
-	"net/http"
+import "github.com/gofiber/fiber/v3"
 
-	"github.com/labstack/echo/v4"
-)
-
-func (s *server) handleHelloWorld(c echo.Context) error {
-	return c.JSON(http.StatusOK, map[string]string{
-		"message": "Hello, World!",
-	})
+func (s *server) handleHelloWorld(c fiber.Ctx) error {
+	return c.SendString("Hello, World 👋!")
 }

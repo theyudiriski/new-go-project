@@ -1,8 +1,10 @@
 package server
 
 import (
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
+	"new-go-project/cmd/internal/postgres"
+	"new-go-project/cmd/service"
+
+	"github.com/gofiber/fiber/v3"
 )
 
 type Server interface {
@@ -10,24 +12,41 @@ type Server interface {
 }
 
 type server struct {
-	app *echo.Echo
+	app *fiber.App
+	db  *postgres.Client
+
+	userService service.UserService
 }
 
 func NewServer() Server {
-	echoApp := echo.New()
+	app := fiber.New()
+
+	db, err := postgres.NewClient()
+	if err != nil {
+		panic(err)
+	}
+
+	userStore := postgres.NewUserStore(db)
+	userService := service.NewUserService(userStore)
 
 	return &server{
-		app: echoApp,
+		app: app,
+		db:  db,
+
+		userService: userService,
 	}
 }
 
 func (s *server) Start() {
-	s.app.Use(middleware.Logger())
-	s.app.Use(middleware.Recover())
+	s.app.Get("/hello-world", s.handleHelloWorld)
+	s.app.Get("/hello/:name", s.handleHello)
 
-	// register API routes
-	s.app.GET("/hello-world", s.handleHelloWorld)
-	s.app.GET("/hello/:name", s.handleHello)
+	// health check
+	s.app.Get("/health", s.handleHealth)
 
-	s.app.Start(":8080")
+	// users
+	s.app.Post("/users", s.handleCreateUser)
+	s.app.Get("/users", s.handleGetUsers)
+
+	s.app.Listen(":8080")
 }
